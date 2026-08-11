@@ -1,0 +1,347 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============ Demo Bros Design System ============
+   Dark-first, industrial, premium.
+   #1A1A1A charcoal · #F2F1EF bone · #2D9D3A green
+=================================================== */
+
+/* font-weight matches the font's own OS/2 usWeightClass (800). Keep the
+   @utility font-heading weight below in sync — requesting a weight this face
+   doesn't declare makes some browsers synthesise a faux bold. */
+@font-face {
+  font-family: "Akira Expanded";
+  src: url("/fonts/AkiraExpanded.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Albert Sans";
+  src: url("/fonts/AlbertSans-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --font-body: "Albert Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Akira Expanded", ui-sans-serif, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-light: var(--light);
+  --color-light-foreground: var(--light-foreground);
+  --color-charcoal: var(--charcoal);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Light theme. Same three brand colours as the dark build, inverted: bone is now
+   the page, charcoal is now the type, green is unchanged.
+
+   Two tokens deliberately stay light-on-dark, because they name a colour rather
+   than a role — `--charcoal` and `--secondary` are used for scrims and type that
+   sit ON photography and video, where the surface is the image, not the page. */
+:root {
+  --radius: 0.25rem;
+  /* bone #F2F1EF */
+  --background: oklch(0.9583 0.0025 106.45);
+  /* charcoal #1A1A1A */
+  --foreground: oklch(0.2178 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2178 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2178 0 0);
+  /* green #2D9D3A */
+  --primary: oklch(0.6172 0.1706 145.15);
+  --primary-foreground: oklch(1 0 0);
+  /* Light type for use ON imagery — bone on purpose. */
+  --secondary: oklch(0.9583 0.0025 106.45);
+  --secondary-foreground: oklch(0.2178 0 0);
+  --muted: oklch(0.928 0.002 106.45);
+  /* ~4.8:1 on bone — passes AA for body copy. */
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.9 0.002 106.45);
+  --accent-foreground: oklch(0.2178 0 0);
+  --destructive: oklch(0.505 0.213 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0 0 0 / 12%);
+  --input: oklch(0 0 0 / 16%);
+  --ring: oklch(0.6172 0.1706 145.15);
+  /* Alternating band: pure white against the bone page. */
+  --light: oklch(1 0 0);
+  --light-foreground: oklch(0.2178 0 0);
+  --charcoal: oklch(0.2178 0 0);
+  --chart-1: oklch(0.6172 0.1706 145.15);
+  --chart-2: oklch(0.45 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.75 0.09 145);
+  --chart-5: oklch(0.4 0.1 145);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.2178 0 0);
+  --sidebar-primary: oklch(0.6172 0.1706 145.15);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9 0.002 106.45);
+  --sidebar-accent-foreground: oklch(0.2178 0 0);
+  --sidebar-border: oklch(0 0 0 / 12%);
+  --sidebar-ring: oklch(0.6172 0.1706 145.15);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  /* `word-break: break-word` used to sit here too. It behaves like
+     `overflow-wrap: anywhere`, which feeds into min-content sizing — so inside a
+     grid or flex track the browser decided a heading could be one character wide
+     and split ordinary words like STRIP-OUT across two lines even when there was
+     room. `overflow-wrap: break-word` alone is the safety net we actually want:
+     it only ever breaks a word that cannot fit a line by itself. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    overflow-wrap: break-word;
+    hyphens: none;
+  }
+
+  p,
+  li,
+  input,
+  button,
+  select,
+  textarea {
+    font-family: var(--font-body);
+  }
+
+  /* Long unbroken strings (an email address, a URL) still must not blow out a
+     narrow phone — but a normal word is left whole. Same reasoning as above. */
+  a,
+  span {
+    overflow-wrap: break-word;
+    hyphens: none;
+  }
+
+  /* Tailwind v4's Preflight dropped `cursor: pointer` from buttons in favour of
+     the browser default (`cursor: default`), which makes every button on the page
+     feel unclickable. Put it back everywhere something is actually interactive. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  summary,
+  select:not(:disabled),
+  input[type="file"]:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="range"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* Display heading utility.
+   font-weight must match the @font-face descriptor above (800). Requesting 900
+   against the single 800 face makes some browsers synthesise a faux bold.
+   Akira Expanded is a static CFF font with no variation axes, so font-stretch /
+   font-variation-settings had no effect and are omitted — the family is already
+   expanded by design. */
+@utility font-heading {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+/* Typography Scale */
+@utility text-hero {
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1.05;
+}
+
+@utility text-section-title {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  line-height: 1.1;
+}
+
+@utility text-card-title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.2;
+}
+
+@utility text-body-fluid {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  line-height: 1.6;
+}
+
+/* wide container */
+@utility container-wide {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 90rem;
+  padding-inline: clamp(1.25rem, 4.5vw, 4rem);
+}
+
+/* eyebrow label.
+   Fluid, because 0.32em of tracking on uppercase text is enormous: at the fixed
+   0.75rem this used to be, "QUESTIONS WE GET EVERY WEEK" measured wider than the
+   content box of a 320px phone and pushed the page sideways. Scaling the size
+   and easing the tracking keeps the longest label on one line at 320px without
+   touching how it reads on a desktop. */
+@utility eyebrow {
+  font-size: clamp(0.625rem, 2.4vw, 0.75rem);
+  letter-spacing: clamp(0.2em, 0.9vw, 0.32em);
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* thin divider line */
+@utility hairline {
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* marquee */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@utility animate-marquee {
+  animation: marquee 36s linear infinite;
+}
+
+/* The window a marquee track runs behind.
+   `touch-action: pan-y` is the important line. The track inside is far wider than
+   the screen, so on a phone the browser treated a swipe that started over the
+   cards as an attempt to pan that overflow sideways and swallowed it — the page
+   simply stopped scrolling at the reviews band. Declaring pan-y hands every
+   vertical drag straight back to the document. */
+@utility marquee-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
+}
+
+/* slow zoom for hero imagery */
+@keyframes slow-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+@utility animate-slow-zoom {
+  animation: slow-zoom 18s ease-out forwards;
+}
+
+/* floating dust particles */
+@keyframes dust {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--dust-o, 0.5);
+  }
+  90% {
+    opacity: var(--dust-o, 0.5);
+  }
+  100% {
+    transform: translate3d(var(--dust-x, 40px), -80vh, 0);
+    opacity: 0;
+  }
+}
+@utility animate-dust {
+  animation: dust var(--dust-d, 14s) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ============ house-demolition v2 (bold editorial) utilities ============ */
+@utility num-outline {
+  color: color-mix(in oklch, var(--color-primary) 22%, transparent);
+  -webkit-text-stroke: 1.5px var(--color-primary);
+}
+@utility hazard-rule {
+  height: 8px;
+  background-image: repeating-linear-gradient(-45deg, var(--color-primary) 0 10px, transparent 10px 20px);
+  opacity: 0.85;
+}
