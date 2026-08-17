@@ -4,29 +4,31 @@ import { z } from "zod";
 // re-validated server-side inside the submitLead server function, so the browser
 // and the server agree on exactly what a valid submission looks like.
 //
-// Shape comes from Campaign 1 deck, section 02: a SINGLE step, with name, email,
-// phone, property address, what's on the block, house size, asbestos and start
-// date required, and photos and comments optional.
+// Shape comes from copy deck v8, section 02 (build note 2): a SINGLE step, with
+// name, email, phone, suburb, job type and start date required, and photos and
+// comments optional.
 export const quoteSchema = z.object({
   name: z.string().trim().nonempty("Please enter your name").max(100),
-  // Required here, so a quote can actually be sent in writing.
+  // Required here, unlike earlier versions of this form. The deck makes it a
+  // required field so a quote can actually be sent in writing.
   email: z.email("Please enter a valid email").max(255),
   phone: z.string().trim().min(8, "Please enter a valid phone number").max(20),
-  // Address of the property (or suburb). A five-figure demolition quote needs the
-  // block, not just a postcode.
-  address: z.string().trim().nonempty("Please enter the property address or suburb").max(200),
+  suburb: z.string().trim().nonempty("Please enter your suburb or postcode").max(100),
   /**
-   * "What's on the block?" — MULTI-SELECT. The lead record must store every
-   * option ticked, not just the first. Driven through a field controller that
-   * hands back the full selection on every change.
+   * MULTI-SELECT. Deck build note 2: the lead record must store every option
+   * ticked, not just the first.
+   *
+   * Always an array, never a bare string — the MultiSelect control is driven
+   * through a field controller that hands back the full selection on every
+   * change, so there is no "one value or many" ambiguity to normalise here.
    */
-  blockItems: z.array(z.string()).min(1, "Please choose what's on the block").max(20),
-  /** "Roughly how big is the house?" — single select, plain language. */
-  houseSize: z.string().nonempty("Please choose roughly how big the house is"),
-  /** "Do you know if there's asbestos?" — single select. */
-  asbestos: z.string().nonempty("Please choose an asbestos option"),
-  /** "When are you hoping to start?" — single select. */
-  timing: z.string().nonempty("Please choose when you're hoping to start"),
+  services: z.array(z.string()).min(1, "Please choose what needs to come out").max(20),
+  /*
+   * There is no `timing` field. The deck's build note 2 listed a required start
+   * date, and it has been dropped since — it was a required answer that gated
+   * the form on a guess most people have not made yet, and the crew asks it on
+   * the follow-up call anyway.
+   */
   comments: z.string().trim().max(2000).optional(),
 });
 
@@ -42,9 +44,6 @@ export const leadSchema = quoteSchema.extend({
   pageUrl: z.string().max(1000).optional().default(""),
   referrer: z.string().max(1000).optional().default(""),
   tracking: z.record(z.string(), z.string()).optional().default({}),
-  /* Cloudinary URLs for any photos the customer attached. */
-  photoUrls: z.array(z.string().max(500)).max(5).optional().default([]),
-  photoNote: z.string().max(300).optional().default(""),
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;

@@ -84,47 +84,19 @@ export const quoteForm = {
 };
 
 /**
- * "What's on the block?" — MULTI-SELECT, in exactly this order.
+ * "What needs to come out?" — MULTI-SELECT, in exactly this order.
  * The lead record must store every option ticked. `value` travels to GoHighLevel.
+ *
+ * Shared with the main Demo Bros landing page so both forms hand GoHighLevel the
+ * same service slugs. The house-demolition questions this form used to ask —
+ * house size, asbestos and start date — are asked on the follow-up call instead.
  */
-export const blockItemOptions = [
-  { value: "house", label: "House" },
-  { value: "garage-carport", label: "Garage or carport" },
-  { value: "shed-outbuilding", label: "Shed or outbuilding" },
-  { value: "pool", label: "Pool" },
-  { value: "driveway-paths-concrete", label: "Driveway, paths or concrete" },
-  { value: "trees", label: "Trees" },
-  { value: "fencing", label: "Fencing" },
-];
-
-/** "Roughly how big is the house?" — single select, plain language. */
-export const houseSizeOptions = [
-  { value: "small-2br-unit", label: "Small — 2 bedrooms or a unit" },
-  { value: "standard-3br-single", label: "Standard — 3 bedrooms, single storey" },
-  { value: "large-4br-single", label: "Large — 4+ bedrooms, single storey" },
-  { value: "double-storey", label: "Double storey" },
-  { value: "not-sure", label: "Not sure" },
-];
-
-/** "Do you know if there's asbestos?" — single select. */
-export const asbestosOptions = [
-  { value: "yes", label: "Yes, there is" },
-  { value: "no-checked", label: "No, it's been checked" },
-  { value: "not-sure-pre-1990", label: "Not sure — the house is pre-1990" },
-  { value: "not-sure", label: "Not sure at all" },
-];
-
-/**
- * "When are you hoping to start?" — single select.
- * "Just getting quotes for now" is deliberate: on a five-figure job most
- * enquiries are early, and capturing that honestly beats losing the lead.
- */
-export const timingOptions = [
-  { value: "asap", label: "As soon as possible" },
-  { value: "within-a-month", label: "Within a month" },
-  { value: "2-3-months", label: "In 2 to 3 months" },
-  { value: "later", label: "Later than that" },
-  { value: "just-quoting", label: "Just getting quotes for now" },
+export const quoteServiceOptions = [
+  { value: "strip-out", label: "Strip Out" },
+  { value: "partial-demolition", label: "Partial Demolition" },
+  { value: "full-home-demolition", label: "Full Home Demolition" },
+  { value: "rubbish-removal", label: "Rubbish Removal" },
+  { value: "other", label: "Other" },
 ];
 
 /* =========================== 03 · TRUST STATS =========================== */
@@ -341,6 +313,34 @@ export const asbestos = {
   image: "/images/asbestos/asbestos-removal.jpg",
 };
 
+/* ========================= WHO WE WORK WITH ========================= */
+
+/**
+ * Four audiences, one word each, drawn as line art.
+ *
+ * Sits between the price and the timeline: the visitor has just read what it
+ * costs, and this answers the next question — whether Demo Bros works with people
+ * like them — before they have to ask it.
+ *
+ * Custom artwork rather than a stock icon set, because these have to carry
+ * PEOPLE, not just buildings — a house with someone standing in it reads as
+ * "homeowner" in a way that an outline of a house never will. Shared with the
+ * main Demo Bros landing page.
+ *
+ * Filenames are lowercase. Windows serves a path whatever its case; the host this
+ * deploys to will not, and a capital letter in a path is a class of bug that only
+ * ever shows up in production.
+ */
+export const audiences = {
+  title: "Who we work with",
+  items: [
+    { image: "/images/audiences/homeowners.png", label: "Homeowners" },
+    { image: "/images/audiences/builders.png", label: "Builders" },
+    { image: "/images/audiences/developers.png", label: "Developers" },
+    { image: "/images/audiences/government.png", label: "Government" },
+  ],
+};
+
 /* ============================= 09 · TIMELINE ============================= */
 
 /**
@@ -351,6 +351,22 @@ export const asbestos = {
  * (published guides say 3–8 weeks first inspection to cleared site, most of it
  * approvals), not Demo Bros' measured averages. Steps 2, 3 and 4 are the ones to
  * check. They also appear in the FAQ answer on timing — change both together.
+ *
+ * All five steps carry a photo. `image` stays optional in the shape the page
+ * reads, so a step can lose its photo without breaking the layout — it renders
+ * as text on its own.
+ *
+ * `short` is the phone line and `detail` the desktop one. They are different
+ * sentences on purpose: the compact phone card gives the copy about half a card's
+ * width beside the thumbnail, where a three-line paragraph turns a clean row into
+ * a block of text. `short` says the same thing in one line and carries the
+ * duration with it, since the phone card has no room for the duration chip.
+ *
+ * Steps 01 and 02 are generated stand-ins shot to match the real library (same
+ * overcast Melbourne light, same hi-vis, same suburban brick veneer): a quote on
+ * a clipboard in front of the house, and the meters being checked against the
+ * permit form. Swap both for real job photos when there are any — nothing in the
+ * Demo Bros libraries covered either moment. Steps 03, 04 and 05 are real.
  */
 export const timeline = {
   eyebrow: "How long it takes",
@@ -361,27 +377,46 @@ export const timeline = {
       n: "01",
       title: "Quote — within 24 hours",
       detail: "Itemised and fixed, off your photos or a site visit.",
+      short: "Itemised and fixed, within 24 hours",
+      image: "/images/timeline/01-quote-in-writing.jpg",
+      imageAlt: "An itemised Demo Bros demolition quote on a clipboard",
     },
     {
       n: "02",
       title: "Permits and disconnections — 4–6 weeks",
       detail:
         "The longest part, and it's on us. Four service providers and council, all running at once rather than one after the other.",
+      short: "Council and all four services — 4–6 weeks",
+      image: "/images/timeline/02-permits-disconnections.jpg",
+      imageAlt:
+        "A Demo Bros supervisor checking a permit form against the electricity, gas and water meters on the side of a Melbourne house, the main fuse pulled and tagged",
     },
     {
       n: "03",
       title: "Asbestos removal, if needed — 1–2 days",
       detail: "Done before the machine arrives, not around it.",
+      short: "Before the machine arrives — 1–2 days",
+      image: "/images/asbestos/asbestos-removal.jpg",
+      imageAlt:
+        "A licensed removalist in coveralls and a respirator taking asbestos cement sheeting off a weatherboard house",
     },
     {
       n: "04",
       title: "Demolition — 2–4 days",
       detail: "A standard single-storey home is usually down and gone inside a week.",
+      short: "Down and gone in 2–4 days",
+      image: "/images/timeline/04-demolition.jpg",
+      imageAlt:
+        "An excavator taking down a weatherboard house behind orange site fencing on a Melbourne street",
     },
     {
       n: "05",
       title: "Block levelled and handed over",
       detail: "Clean, level, photographed. Your builder starts.",
+      short: "Clean, level, photographed",
+      image: "/images/knock-down/knock-down-rebuild.jpg",
+      imageAlt:
+        "A cleared, level block fenced off and ready for the builder, with the excavator parked to one side",
     },
   ],
   close:

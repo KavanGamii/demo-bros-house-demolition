@@ -8,12 +8,14 @@ import { SITE, footer } from "@/lib/site-data";
  * commercial line: deck note 7 pulled office defit and retail strip out off this
  * page entirely, so this is where that traffic is pointed instead.
  *
- * The bottom padding reserves the height of the sticky mobile action bar, which
- * is fixed and would otherwise sit on top of the copyright line on a phone.
+ * The bottom padding reserves the height of the sticky mobile quote bar, which
+ * is fixed and would otherwise sit on top of the copyright line on a phone. The
+ * safe-area inset is part of the sum because it is part of the bar: on a notched
+ * iPhone the bar grows by the height of the home-indicator strip.
  */
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-card pb-[4.5rem] md:pb-0">
+    <footer className="border-t border-border bg-card pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
       <div className="container-wide py-10">
         <p className="mx-auto max-w-3xl text-center text-sm text-muted-foreground">
           {footer.coverage}

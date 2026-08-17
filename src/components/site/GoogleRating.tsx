@@ -121,12 +121,12 @@ export function GoogleRatingSticky() {
 export function GoogleRatingBadge({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-sm sm:gap-2.5 sm:px-3.5 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 shadow-sm sm:gap-2 sm:px-3 sm:py-1.5 ${className}`}
     >
-      <GoogleG className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
-      <span className="text-sm font-bold text-foreground">{RATING}</span>
-      <GoogleStars className="h-[13px] w-[13px] sm:h-[15px] sm:w-[15px]" />
-      <span className="text-xs whitespace-nowrap text-muted-foreground">
+      <GoogleG className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+      <span className="text-[0.8rem] font-bold text-foreground">{RATING}</span>
+      <GoogleStars className="h-3 w-3 sm:h-[13px] sm:w-[13px]" />
+      <span className="text-[0.7rem] whitespace-nowrap text-muted-foreground">
         {REVIEW_COUNT} <span className="hidden sm:inline">Google </span>reviews
       </span>
     </span>

@@ -4,19 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { CtaButton } from "./CtaButton";
 import { MultiSelect } from "./MultiSelect";
-import {
-  SITE,
-  CTA_LABEL,
-  quoteForm,
-  blockItemOptions,
-  houseSizeOptions,
-  asbestosOptions,
-  timingOptions,
-} from "@/lib/site-data";
+import { SITE, CTA_LABEL, quoteForm, quoteServiceOptions } from "@/lib/site-data";
 import { quoteSchema, type QuoteValues } from "@/lib/quote-schema";
 import { submitLead } from "@/lib/lead.functions";
 import { captureTracking, getTracking } from "@/lib/tracking";
-import { uploadPhotos, validateFiles } from "@/lib/photo-upload";
 
 const baseInput =
   "w-full rounded-md transition-all duration-300 focus:ring-2 focus:ring-primary/30 focus:outline-none";
@@ -26,11 +17,10 @@ const TONE = {
   light: {
     input:
       "border border-black/10 bg-white text-charcoal placeholder:text-muted-foreground/70 shadow-sm hover:border-black/20 focus:border-primary",
-    label: "mb-1.5 block text-sm font-semibold text-charcoal",
+    label: "mb-1 block text-[0.8rem] font-semibold text-charcoal sm:mb-1.5 sm:text-sm",
     hint: "text-charcoal/60",
     muted: "text-charcoal/50",
     error: "text-destructive",
-    dropzone: "border-dashed border-black/20 bg-white text-charcoal hover:border-primary/50",
     panel: "border-black/10 bg-white text-charcoal",
     option: "text-charcoal hover:bg-black/[0.04]",
   },
@@ -39,18 +29,29 @@ const TONE = {
     // rather than something to type into.
     input:
       "border border-white/20 bg-white text-charcoal placeholder:text-charcoal/45 shadow-sm hover:border-white focus:border-white",
-    label: "mb-1.5 block text-sm font-semibold text-primary-foreground",
+    label: "mb-1 block text-[0.8rem] font-semibold text-primary-foreground sm:mb-1.5 sm:text-sm",
     hint: "text-primary-foreground/80",
     muted: "text-primary-foreground/65",
     error: "text-white",
-    dropzone: "border-dashed border-white/40 bg-white text-charcoal hover:border-white",
     panel: "border-white/20 bg-white text-charcoal",
     option: "text-charcoal hover:bg-black/[0.04]",
   },
 } as const;
 
-/** Full-width fields sit on their own row; the short ones pair up. */
-const WIDE = "sm:col-span-2";
+/**
+ * Full-width fields sit on their own row; the four short ones pair up.
+ *
+ * 390px, not `sm`. Name, email, phone and suburb take short answers and pair
+ * happily from an iPhone 14 upward, which halves four rows into two. Below that
+ * — an iPhone SE and similar — two columns leave about 125px of usable width per
+ * input, where a typed email scrolls out of view as you write it, so they go
+ * back to one per row.
+ *
+ * This breakpoint has to match the grid's exactly. If the columns start at 390px
+ * and the wide fields only start spanning at `sm`, everything between the two
+ * sits in a single column while the short fields are already paired.
+ */
+const WIDE = "min-[390px]:col-span-2";
 
 /**
  * The single-step quote form from copy deck v8, section 02.
@@ -65,24 +66,27 @@ const WIDE = "sm:col-span-2";
 export function QuoteForm({
   compact = false,
   tone = "light",
-  photos = true,
   comments = true,
 }: {
   compact?: boolean;
   tone?: keyof typeof TONE;
-  photos?: boolean;
   comments?: boolean;
 }) {
   const t = TONE[tone];
   const labelClass = t.label;
   const inputClass = `${baseInput} ${t.input} ${
-    compact ? "px-4 py-3 text-[0.95rem]" : "px-5 py-4 text-base"
+    compact
+      ? "px-4 py-2.5 text-[0.95rem]"
+      : // Mobile gets the compact metrics whether or not `compact` was asked
+        // for, and only grows from sm. Eight fields at 16px of vertical padding
+        // each, plus a label and a 20px gutter apiece, ran the hero form past
+        // two full phone screens — and a form you cannot see the end of reads as
+        // longer than it is, which is the thing that stops people starting it.
+        "px-4 py-2.5 text-[0.95rem] sm:px-5 sm:py-3.5 sm:text-base"
   }`;
 
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
-  const [fileError, setFileError] = useState<string | null>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -92,48 +96,25 @@ export function QuoteForm({
     formState: { errors, isSubmitting },
   } = useForm<QuoteValues>({
     resolver: zodResolver(quoteSchema),
-    defaultValues: { blockItems: [], houseSize: "", asbestos: "", timing: "" },
+    defaultValues: { services: [] },
   });
 
-  // The "what's on the block" picker is a custom control rather than a native
-  // input, so it is driven through the field controller instead of `register`.
-  const blockItemsField = useController({ control, name: "blockItems" });
+  // The service picker is a custom control rather than a native input, so it is
+  // driven through the field controller instead of `register`.
+  const servicesField = useController({ control, name: "services" });
 
   // Record first-touch ad/campaign attribution as soon as the form mounts.
   useEffect(() => {
     captureTracking();
   }, []);
 
-  function onFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const picked = Array.from(e.target.files ?? []);
-    const problem = validateFiles(picked);
-    setFileError(problem);
-    setFiles(problem ? [] : picked);
-  }
-
-  /** Photo failures are logged for the crew, never allowed to block the lead. */
-  function noteFor(reason: "not-configured" | "failed", count: number) {
-    const why = reason === "not-configured" ? "uploads are not configured" : "the upload failed";
-    return `Customer attached ${count} photo(s) but ${why}. Follow up for them.`;
-  }
-
   const onSubmit = async (values: QuoteValues) => {
     setErrorMsg(null);
-
-    let photoUrls: string[] = [];
-    let photoNote = "";
-    if (photos) {
-      const upload = await uploadPhotos(files);
-      if (upload.ok) photoUrls = upload.urls;
-      else photoNote = noteFor(upload.reason, files.length);
-    }
 
     try {
       await submitLead({
         data: {
           ...values,
-          photoUrls,
-          photoNote,
           website: honeypotRef.current?.value ?? "",
           page: window.location.pathname,
           pageUrl: window.location.href,
@@ -195,7 +176,7 @@ export function QuoteForm({
             onSubmit={handleSubmit(onSubmit)}
             noValidate
             exit={{ opacity: 0, y: -12 }}
-            className={`grid sm:grid-cols-2 ${compact ? "gap-3.5" : "gap-5"}`}
+            className={`grid grid-cols-1 min-[390px]:grid-cols-2 ${compact ? "gap-3" : "gap-3 sm:gap-5"}`}
           >
             {/* Honeypot: hidden from real users; bots that fill it are dropped server-side. */}
             <div
@@ -219,7 +200,7 @@ export function QuoteForm({
               <input
                 id="q-name"
                 autoComplete="name"
-                placeholder="First and last name"
+                placeholder="Full name"
                 className={inputClass}
                 {...register("name")}
               />
@@ -260,136 +241,49 @@ export function QuoteForm({
               )}
             </div>
 
-            {/* Address of the property (or suburb) — full width; a demolition
-                quote needs the block, not just a postcode. */}
-            <div className={WIDE}>
-              <label htmlFor="q-address" className={labelClass}>
-                Address of the property{" "}
-                <span className={`font-normal ${t.muted}`}>(or suburb)</span>
+            <div>
+              <label htmlFor="q-suburb" className={labelClass}>
+                Suburb or postcode
               </label>
               <input
-                id="q-address"
-                autoComplete="street-address"
-                placeholder="e.g. 12 Example St, Reservoir"
+                id="q-suburb"
+                autoComplete="address-level2"
+                placeholder="e.g. South Yarra"
                 className={inputClass}
-                {...register("address")}
+                {...register("suburb")}
               />
-              {errors.address && (
-                <p className={`mt-1.5 text-sm ${t.error}`}>{errors.address.message}</p>
+              {errors.suburb && (
+                <p className={`mt-1.5 text-sm ${t.error}`}>{errors.suburb.message}</p>
               )}
             </div>
 
-            {/* Multi-select. It looks and opens like the dropdowns beside it, but
-                each row toggles instead of closing the menu. */}
+            {/* Multi-select. Looks and opens like an ordinary dropdown, but each
+                row toggles instead of closing the menu — see MultiSelect for why
+                neither a checkbox grid nor a native `<select multiple>` was
+                usable here. */}
             <div className={WIDE}>
-              <label htmlFor="q-block" className={labelClass}>
-                What's on the block?{" "}
+              <label htmlFor="q-services" className={labelClass}>
+                What needs to come out?{" "}
                 <span className={`font-normal ${t.muted}`}>(select all that apply)</span>
               </label>
               <MultiSelect
-                id="q-block"
-                options={blockItemOptions}
-                value={blockItemsField.field.value ?? []}
-                onChange={blockItemsField.field.onChange}
-                onBlur={blockItemsField.field.onBlur}
-                invalid={Boolean(errors.blockItems)}
+                id="q-services"
+                options={quoteServiceOptions}
+                value={servicesField.field.value ?? []}
+                onChange={servicesField.field.onChange}
+                onBlur={servicesField.field.onBlur}
+                invalid={Boolean(errors.services)}
                 triggerClassName={inputClass}
                 panelClassName={t.panel}
                 optionClassName={t.option}
                 chipClassName="bg-primary text-primary-foreground"
               />
-              {errors.blockItems && (
-                <p id="q-block-error" className={`mt-1.5 text-sm ${t.error}`}>
-                  {errors.blockItems.message}
+              {errors.services && (
+                <p id="q-services-error" className={`mt-1.5 text-sm ${t.error}`}>
+                  {errors.services.message}
                 </p>
               )}
             </div>
-
-            <div>
-              <label htmlFor="q-size" className={labelClass}>
-                Roughly how big is the house?
-              </label>
-              <select id="q-size" className={inputClass} {...register("houseSize")}>
-                <option value="" disabled>
-                  Select…
-                </option>
-                {houseSizeOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              {errors.houseSize && (
-                <p className={`mt-1.5 text-sm ${t.error}`}>{errors.houseSize.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="q-asbestos" className={labelClass}>
-                Any asbestos?
-              </label>
-              <select id="q-asbestos" className={inputClass} {...register("asbestos")}>
-                <option value="" disabled>
-                  Select…
-                </option>
-                {asbestosOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              {errors.asbestos && (
-                <p className={`mt-1.5 text-sm ${t.error}`}>{errors.asbestos.message}</p>
-              )}
-            </div>
-
-            <div className={WIDE}>
-              <label htmlFor="q-timing" className={labelClass}>
-                When are you hoping to start?
-              </label>
-              <select id="q-timing" className={inputClass} {...register("timing")}>
-                <option value="" disabled>
-                  Select…
-                </option>
-                {timingOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-              {errors.timing && (
-                <p className={`mt-1.5 text-sm ${t.error}`}>{errors.timing.message}</p>
-              )}
-            </div>
-
-            {/* Step 01 of the process promises "attach any photos for a faster,
-                more accurate quote" — this is the field that makes that true.
-                Uploads straight to Cloudinary; only the URLs go on to GoHighLevel. */}
-            {photos && (
-              <div className={WIDE}>
-                <label htmlFor="q-photos" className={labelClass}>
-                  Photos of the house{" "}
-                  <span className={`font-normal ${t.muted}`}>(optional — front, back and both sides)</span>
-                </label>
-                <input
-                  id="q-photos"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic"
-                  multiple
-                  onChange={onFilesChange}
-                  className={`w-full cursor-pointer rounded-md border px-4 py-3 text-sm file:mr-3 file:cursor-pointer file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-foreground ${t.dropzone}`}
-                />
-                {fileError ? (
-                  <p className={`mt-1.5 text-sm ${t.error}`}>{fileError}</p>
-                ) : (
-                  files.length > 0 && (
-                    <p className={`mt-1.5 text-xs ${t.hint}`}>
-                      {files.length} photo{files.length > 1 ? "s" : ""} ready to send
-                    </p>
-                  )
-                )}
-              </div>
-            )}
 
             {comments && (
               <div className={WIDE}>
@@ -399,7 +293,7 @@ export function QuoteForm({
                 <textarea
                   id="q-comments"
                   rows={4}
-                  placeholder="Access, overhead power, a pool or big trees, your builder's date…"
+                  placeholder="Rooms, access, upper floors, anything pre-1990…"
                   className={inputClass}
                   {...register("comments")}
                 />
@@ -413,7 +307,13 @@ export function QuoteForm({
                 fullWidth
                 icon={!isSubmitting}
                 size={compact ? "md" : "lg"}
-                variant={tone === "onGreen" ? "solidLight" : "solid"}
+                /* Black with bone text on the green panel, brand green on the
+                   white one. `solid` cannot serve both: it is `bg-primary`, and
+                   on the green panel a green button disappears into its own
+                   background. Charcoal is the strongest thing that can sit on
+                   this green — it measures about 5:1 against it, so the button
+                   has a hard edge instead of relying on a shadow to exist. */
+                variant={tone === "onGreen" ? "contrast" : "solid"}
                 className={compact ? "" : "sm:w-auto"}
               >
                 {isSubmitting ? "Sending…" : CTA_LABEL}

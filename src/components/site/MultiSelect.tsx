@@ -205,9 +205,14 @@ export function MultiSelect({
       {/* A div, not a button: the chips carry their own remove buttons, and a
           button nested inside a button is invalid markup that browsers resolve
           by dropping one of them. The chevron is the real focusable control. */}
+      {/* Toggle, not `setOpen(true)`. Opening was the only thing a click on the
+          field could do, so the one gesture everybody tries first — tap the
+          field again to dismiss it — did nothing at all, and the menu could only
+          be closed by finding somewhere else on the page to click. Clicking
+          outside still closes it; this just makes the obvious move work too. */}
       <div
         ref={fieldRef}
-        onClick={() => setOpen(true)}
+        onClick={() => setOpen((v) => !v)}
         className={`flex cursor-pointer items-start gap-2 ${triggerClassName}`}
       >
         <div className="flex min-h-6 flex-1 flex-wrap items-center gap-1.5">

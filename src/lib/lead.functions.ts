@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { leadSchema } from "./quote-schema";
-import { blockItemOptions, houseSizeOptions, asbestosOptions, timingOptions } from "./site-data";
+import { quoteServiceOptions } from "./site-data";
 import { normaliseAuPhone, sendToWebhook } from "./ghl";
 
 function labelFor(options: { value: string; label: string }[], value: string): string {
@@ -43,24 +43,14 @@ export const submitLead = createServerFn({ method: "POST" })
       full_name: data.name,
       email: data.email,
       phone: normaliseAuPhone(data.phone),
-      // Address of the property (or suburb). Kept under `suburb` too so the
-      // existing GHL workflow field mapping still resolves.
-      address: data.address,
-      suburb: data.address,
-      // "What's on the block?" is multi-select, so EVERY ticked option has to
+      suburb: data.suburb,
+      // "What needs to come out?" is multi-select, so EVERY ticked option has to
       // survive the trip. `service` stays the human-readable joined list because
       // that is the field the existing GHL workflow already maps; the slugs and
       // the count ride alongside it for filtering and reporting.
-      service: data.blockItems.map((s) => labelFor(blockItemOptions, s)).join(", "),
-      service_slugs: data.blockItems.join(","),
-      service_count: String(data.blockItems.length),
-      // House size and asbestos — both label and slug for filtering/reporting.
-      house_size: labelFor(houseSizeOptions, data.houseSize),
-      house_size_slug: data.houseSize,
-      asbestos: labelFor(asbestosOptions, data.asbestos),
-      asbestos_slug: data.asbestos,
-      timing: labelFor(timingOptions, data.timing),
-      timing_slug: data.timing,
+      service: data.services.map((s) => labelFor(quoteServiceOptions, s)).join(", "),
+      service_slugs: data.services.join(","),
+      service_count: String(data.services.length),
       details: data.comments ?? "",
       source: "Website Landing Page Quote Form",
       page: data.page || "",
@@ -68,9 +58,6 @@ export const submitLead = createServerFn({ method: "POST" })
       referrer: data.referrer || "",
       submitted_at: new Date().toISOString(),
       // Flat keys only: the GHL trigger mapper cannot read nested values.
-      photo_count: String(data.photoUrls?.length ?? 0),
-      photo_urls: (data.photoUrls ?? []).join(" "),
-      photo_note: data.photoNote ?? "",
       // UTM / click-id attribution (utm_source, gclid, fbclid, ...) if present.
       ...data.tracking,
     };

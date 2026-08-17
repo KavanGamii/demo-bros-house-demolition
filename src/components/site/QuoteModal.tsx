@@ -113,12 +113,14 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   A real site photo behind it rather than flat bone. A crew
                   mid-demolition says more than any sentence on it.
 
-                  On a phone this drops BELOW the form. Stacked, the pitch pushed
-                  the fields most of a screen down, so someone who tapped a button
-                  labelled "Get my fixed price" landed on more marketing instead
-                  of the thing they asked for. On desktop the two sit side by side
-                  and the order stops mattering. */}
-              <div className="relative order-2 overflow-hidden bg-light p-5 sm:p-9 lg:order-1">
+                  DESKTOP ONLY. Stacked on a phone this ran a full screen of
+                  headline, four benefits, a rating badge and a phone number under
+                  the form — and every one of those arguments is one the visitor
+                  has already read and accepted, or they would not have tapped the
+                  button. Re-selling someone who has agreed just gives them more
+                  to scroll past on the way to submitting. Side by side on desktop
+                  it costs nothing, so it stays there. */}
+              <div className="relative hidden overflow-hidden bg-light p-5 sm:p-9 lg:order-1 lg:block">
                 <img
                   src="/images/house-demolition/hero.jpg"
                   alt=""
@@ -139,8 +141,8 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                   </p>
 
                   <h2 className="font-heading mt-3 text-xl text-light-foreground sm:text-2xl">
-                    Melbourne house demolition from{" "}
-                    <Highlight tone="green">{FROM_PRICE}</Highlight> — permit, asbestos and all.
+                    Melbourne house demolition from <Highlight tone="green">{FROM_PRICE}</Highlight>{" "}
+                    — permit, asbestos and all.
                   </h2>
 
                   <ul className="mt-7 grid gap-4">
@@ -191,7 +193,7 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                     version, and every extra field costs completions. The hero
                     form carries the full deck version. */}
                 <div className="mt-6">
-                  <QuoteForm compact tone="onGreen" photos={false} comments={false} />
+                  <QuoteForm compact tone="onGreen" comments={false} />
                 </div>
               </div>
             </motion.div>
