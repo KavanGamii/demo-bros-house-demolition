@@ -15,6 +15,7 @@ import { usePastHero } from "@/lib/use-past-hero";
  * like a phone number should: long-press to copy, and it works with JavaScript
  * off.
  */
+
 export function FloatingContact() {
   const visible = usePastHero();
 
