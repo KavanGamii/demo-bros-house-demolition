@@ -21,13 +21,18 @@ import {
 } from "lucide-react";
 
 /**
- * Hero background: an excavator mid-demolition on a residential block — the one
- * page in the account where the excavator shot belongs.
+ * Hero background: a machine mid-demolition on a Melbourne residential block.
  *
- * To swap it, change this one path. Another demolition shot that works:
- *   /images/knock-down/knock-down-rebuild.jpg
+ * Two crops, because one cannot serve both. The desktop frame carries the copy
+ * on its left half under a gradient, so the machine has to sit right of centre
+ * with quiet ground beside it; the phone frame is portrait with the copy over
+ * the whole width, so it needs the machine central and closer in. Swapping
+ * either is a matter of overwriting the file — the paths do not change.
+ *
+ * Another demolition shot that works: /images/knock-down/knock-down-rebuild.jpg
  */
-const HERO_IMAGE = "/images/house-demolition/hero.jpg";
+const HERO_IMAGE = "/images/house-demolition/hero-desktop.jpg";
+const HERO_IMAGE_MOBILE = "/images/house-demolition/hero-mobile.jpg";
 import { Reveal } from "@/components/site/Reveal";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { FaqList, faqJsonLd } from "@/components/site/FaqList";
@@ -178,15 +183,28 @@ function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden bg-background">
-      {/* Static image, no video: it loads instantly and costs nothing on mobile data. */}
-      <img
-        src={HERO_IMAGE}
-        alt="A Demo Bros excavator mid-demolition on a Melbourne residential block"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      {/* Darkest on the left where the copy sits, easing to the right so the
-          excavator still reads behind it. */}
-      <div className="absolute inset-0 bg-gradient-to-r from-charcoal/92 via-charcoal/72 to-charcoal/45" />
+      {/* Static image, no video: it loads instantly and costs nothing on mobile
+          data.
+
+          <picture> rather than two <img> swapped by a breakpoint class: the
+          browser resolves the media query BEFORE fetching and pulls exactly one
+          file, where a `hidden` second image is downloaded anyway on most
+          engines — which on a phone is the desktop hero paid for and never
+          seen. */}
+      <picture>
+        <source media="(max-width: 767px)" srcSet={HERO_IMAGE_MOBILE} />
+        <img
+          src={HERO_IMAGE}
+          alt="A Demo Bros excavator mid-demolition on a Melbourne residential block"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      </picture>
+      {/* Desktop: darkest on the left where the copy sits, easing right so the
+          machine still reads behind it. Phones: the copy runs the full width, so
+          a left-to-right wash would leave the last words of every line sitting
+          on the bright side of the picture — it washes top to bottom there
+          instead, even across. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-charcoal/88 via-charcoal/80 to-charcoal/88 md:bg-gradient-to-r md:from-charcoal/92 md:via-charcoal/72 md:to-charcoal/45" />
 
       <div className="container-wide relative z-10 grid items-center gap-10 pt-28 pb-14 lg:grid-cols-2 lg:gap-14  lg:pb-20">
         <div>
